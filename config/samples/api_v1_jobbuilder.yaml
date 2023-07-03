@@ -1,0 +1,12 @@
+apiVersion: api.cf-worker/v1
+kind: JobBuilder
+metadata:
+  labels:
+    app.kubernetes.io/name: jobbuilder
+    app.kubernetes.io/instance: jobbuilder-sample
+    app.kubernetes.io/part-of: workerbundle
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: workerbundle
+  name: jobbuilder-sample
+spec:
+  # TODO(user): Add fields here

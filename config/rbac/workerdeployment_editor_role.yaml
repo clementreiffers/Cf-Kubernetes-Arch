@@ -1,0 +1,31 @@
+# permissions for end users to edit workerdeployments.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: workerdeployment-editor-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: workerbundle
+    app.kubernetes.io/part-of: workerbundle
+    app.kubernetes.io/managed-by: kustomize
+  name: workerdeployment-editor-role
+rules:
+- apiGroups:
+  - api.cf-worker
+  resources:
+  - workerdeployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - api.cf-worker
+  resources:
+  - workerdeployments/status
+  verbs:
+  - get

@@ -1,0 +1,24 @@
+apiVersion: api.cf-worker/v1
+kind: WorkerBundle
+metadata:
+  labels:
+    app.kubernetes.io/name: workerbundle
+    app.kubernetes.io/instance: workerbundle-sample
+    app.kubernetes.io/part-of: workerbundle
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: workerbundle
+  name: workerbundle-sample
+spec:
+  deploymentName: "deplName"
+  workers:
+    - workerName: wasm-worker
+      workerNumber: 8080
+      envPrefix: WASM_WORKER_
+      secretRef: "secret-accounts-ref" # prefix WASM_WORKER_ toutes les var d'env
+    - workerName: artist-worker
+      workerNumber: 8081
+      envPrefix: ARTIST_WORKER_
+      secretRef: "secret-accounts-ref"
+  podTemplate:
+    image: "1234:v2" # accounts
+    imagePullSecret: "insert-secret-here"
