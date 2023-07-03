@@ -23,13 +23,15 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+type PodTemplateWorkerAccount struct {
+	ImagePullSecret string `json:"imagePullSecret"`
+}
+
 // WorkerAccountSpec defines the desired state of WorkerAccount
 type WorkerAccountSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
-	// Foo is an example field of WorkerAccount. Edit workeraccount_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	WorkerBundleName      string                   `json:"workerBundleName"`
+	WorkerReleaseSelector metav1.LabelSelector     `json:"workerReleaseSelector"`
+	PodTemplate           PodTemplateWorkerAccount `json:"podTemplate"`
 }
 
 // WorkerAccountStatus defines the observed state of WorkerAccount

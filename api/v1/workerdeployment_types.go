@@ -20,16 +20,16 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+type WorkerDeploymentTemplate struct {
+	ScriptName        string   `json:"scriptName"`
+	SecretRef         string   `json:"secretRef"`
+	CompatibilityDate string   `json:"compatibilityDate"`
+	ScriptsUrls       []string `json:"scriptsUrls"`
+}
 
-// WorkerDeploymentSpec defines the desired state of WorkerDeployment
 type WorkerDeploymentSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
-	// Foo is an example field of WorkerDeployment. Edit workerdeployment_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	Template            WorkerDeploymentTemplate `json:"template"`
+	ReleaseHistoryLimit int32                    `json:"releaseHistoryLimit"`
 }
 
 // WorkerDeploymentStatus defines the observed state of WorkerDeployment

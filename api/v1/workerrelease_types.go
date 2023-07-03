@@ -25,11 +25,10 @@ import (
 
 // WorkerReleaseSpec defines the desired state of WorkerRelease
 type WorkerReleaseSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
-	// Foo is an example field of WorkerRelease. Edit workerrelease_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	ScriptName        string   `json:"scriptName"`
+	SecretRef         string   `json:"secretRef"`
+	CompatibilityDate string   `json:"compatibilityDate"`
+	ScriptUrls        []string `json:"scriptUrls"`
 }
 
 // WorkerReleaseStatus defines the observed state of WorkerRelease
