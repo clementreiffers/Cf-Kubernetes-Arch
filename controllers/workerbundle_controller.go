@@ -18,9 +18,9 @@ package controllers
 
 import (
 	"context"
-	v1 "k8s.io/api/apps/v1"
-	v12 "k8s.io/api/core/v1"
-	v13 "k8s.io/api/networking/v1"
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	networkingv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 
@@ -80,17 +80,17 @@ func (r *WorkerBundleReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	svc := createService(instance)
 	ing := createIngress(instance)
 
-	err = applyResource(r, ctx, &depl, &v1.Deployment{})
+	err = applyResource(r, ctx, &depl, &appsv1.Deployment{})
 	if err != nil {
 		logger.Error(err, "unable to create Deployment")
 		return ctrl.Result{}, err
 	}
-	err = applyResource(r, ctx, svc, &v12.Service{})
+	err = applyResource(r, ctx, svc, &corev1.Service{})
 	if err != nil {
 		logger.Error(err, "unable to create Service")
 		return ctrl.Result{}, err
 	}
-	err = applyResource(r, ctx, ing, &v13.Ingress{})
+	err = applyResource(r, ctx, ing, &networkingv1.Ingress{})
 	if err != nil {
 		logger.Error(err, "unable to create Ingress")
 		return ctrl.Result{}, err
