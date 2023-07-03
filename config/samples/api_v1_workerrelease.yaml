@@ -9,4 +9,9 @@ metadata:
     app.kubernetes.io/created-by: workerbundle
   name: workerrelease-sample
 spec:
-  # TODO(user): Add fields here
+  scriptName: wasm-worker
+  secretRef: "secret-accounts-ref" # prefix WASM_WORKER_ toutes les var d'env
+  compatibilityDate: "MM/DD/YYYY"
+  scriptUrls:
+    - "s3://path/to/dir/version/files1"
+    - "s3://path/to/dir/version/files2"

@@ -9,4 +9,9 @@ metadata:
     app.kubernetes.io/created-by: workerbundle
   name: workeraccount-sample
 spec:
-  # TODO(user): Add fields here
+  workerBundleName: "workerBundleName"
+  workerReleaseSelector:
+    matchLabels:
+      accounts: "1234"
+  podTemplate:
+    imagePullSecret: "insert-secret-here"
