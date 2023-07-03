@@ -18,6 +18,9 @@ package controllers
 
 import (
 	"context"
+	v1 "k8s.io/api/apps/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/types"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -46,10 +49,39 @@ type WorkerBundleReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.14.1/pkg/reconcile
-func (r *WorkerBundleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+func applyResource(r *WorkerBundleReconciler, ctx context.Context, resource client.Object, foundResource client.Object) error {
+	err := r.Get(ctx, types.NamespacedName{Name: resource.GetName(), Namespace: resource.GetNamespace()}, foundResource)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.Create(ctx, resource)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	return err
+}
 
-	// TODO(user): your logic here
+func (r *WorkerBundleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	logger := log.Log.WithValues("PodInstanciator", req.NamespacedName)
+
+	instance := &apiv1.WorkerBundle{}
+	err := r.Get(ctx, req.NamespacedName, instance)
+
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return ctrl.Result{}, nil
+		}
+		return ctrl.Result{}, err
+	}
+
+	depl := createDeployment(instance)
+	err = applyResource(r, ctx, &depl, &v1.Deployment{})
+	if err != nil {
+		logger.Error(err, "unable to create Deployment")
+		return ctrl.Result{}, err
+	}
+
+	logger.Info("successfully created a deployment!")
 
 	return ctrl.Result{}, nil
 }

@@ -35,10 +35,41 @@ spec:
           spec:
             description: WorkerBundleSpec defines the desired state of WorkerBundle
             properties:
-              foo:
-                description: Foo is an example field of WorkerBundle. Edit workerbundle_types.go
-                  to remove/update
+              deploymentName:
                 type: string
+              podTemplate:
+                properties:
+                  image:
+                    type: string
+                  imagePullSecret:
+                    type: string
+                required:
+                - image
+                - imagePullSecret
+                type: object
+              workers:
+                items:
+                  properties:
+                    envPrefix:
+                      type: string
+                    secretRef:
+                      type: string
+                    workerName:
+                      type: string
+                    workerNumber:
+                      format: int32
+                      type: integer
+                  required:
+                  - envPrefix
+                  - secretRef
+                  - workerName
+                  - workerNumber
+                  type: object
+                type: array
+            required:
+            - deploymentName
+            - podTemplate
+            - workers
             type: object
           status:
             description: WorkerBundleStatus defines the observed state of WorkerBundle

@@ -25,7 +25,7 @@ import (
 
 type Worker struct {
 	WorkerName   string `json:"workerName"`
-	WorkerNumber string `json:"workerNumber"`
+	WorkerNumber int32  `json:"workerNumber"`
 	EnvPrefix    string `json:"envPrefix"`
 	SecretRef    string `json:"secretRef"`
 }

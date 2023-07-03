@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/created-by: workerbundle
   name: workerbundle-sample
 spec:
-  deploymentName: "deplName"
+  deploymentName: "deployment-test"
   workers:
     - workerName: wasm-worker
       workerNumber: 8080
@@ -20,5 +20,5 @@ spec:
       envPrefix: ARTIST_WORKER_
       secretRef: "secret-accounts-ref"
   podTemplate:
-    image: "1234:v2" # accounts
+    image: "nginx" # accounts
     imagePullSecret: "insert-secret-here"
