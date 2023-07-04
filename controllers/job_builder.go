@@ -36,7 +36,8 @@ func generateDownloadFilesContainer(instance *apiv1.JobBuilder) v1.Container {
 			{Name: "s3-config", MountPath: "/root/.aws", ReadOnly: true},
 			{Name: "context", MountPath: "/context"},
 		},
-		Command: []string{generateAwsCommandSync(instance.Spec.ScriptUrls, "/context")},
+		Command: []string{"/bin/sh"},
+		Args:    []string{"-c", generateAwsCommandSync(instance.Spec.ScriptUrls, "/context")},
 	}
 }
 
@@ -157,10 +158,12 @@ func createJob(instance *apiv1.JobBuilder) batchv1.Job {
 			//TTLSecondsAfterFinished: &ttl,
 			Template: v1.PodTemplateSpec{
 				Spec: v1.PodSpec{
-					Containers: []v1.Container{
+					InitContainers: []v1.Container{
 						generateDownloadFilesContainer(instance),
 						generateGettingDockerfile(),
 						generateCapnp(),
+					},
+					Containers: []v1.Container{
 						generateKaniko(),
 					},
 					Volumes:       generateVolumes(),
