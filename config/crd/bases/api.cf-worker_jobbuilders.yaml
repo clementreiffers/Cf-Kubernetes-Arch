@@ -36,12 +36,17 @@ spec:
             description: JobBuilderSpec defines the desired state of JobBuilder
             properties:
               scriptUrls:
-                type: string
+                items:
+                  type: string
+                type: array
               targetImage:
+                type: string
+              workerBundleName:
                 type: string
             required:
             - scriptUrls
             - targetImage
+            - workerBundleName
             type: object
           status:
             description: JobBuilderStatus defines the observed state of JobBuilder

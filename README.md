@@ -196,6 +196,7 @@ metadata:
 spec:
   scriptUrls: "s3://path/to/dir/version/"
   targetImage: clementreiffers/artist-worker
+  workerBundleName: worker-bundle-name
 ```
 
 ## License

@@ -25,8 +25,9 @@ import (
 
 // JobBuilderSpec defines the desired state of JobBuilder
 type JobBuilderSpec struct {
-	ScriptUrls  string `json:"scriptUrls"`
-	TargetImage string `json:"targetImage"`
+	ScriptUrls       []string `json:"scriptUrls"`
+	TargetImage      string   `json:"targetImage"`
+	WorkerBundleName string   `json:"workerBundleName"`
 }
 
 // JobBuilderStatus defines the observed state of JobBuilder

@@ -91,15 +91,34 @@ func (r *JobBuilderReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		failed := foundJob.Status.Failed
 		if succeeded == 1 && failed == 0 {
 			logger.Info("Job Successful") //update workerBundle here
-			break
+
+			bundle := &apiv1.WorkerBundle{}
+			err = r.Get(ctx, types.NamespacedName{Name: instance.Spec.WorkerBundleName, Namespace: instance.GetNamespace()}, bundle)
+
+			bundle.Spec = apiv1.WorkerBundleSpec{
+				Workers: []apiv1.Worker{
+					{
+						WorkerName:   "",
+						WorkerNumber: 0,
+						EnvPrefix:    "",
+						SecretRef:    "",
+					},
+				},
+			}
+
+			err = r.Update(ctx, bundle)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+
+			logger.Info("successfully updated bundle!")
+			return ctrl.Result{}, nil
+
 		} else if succeeded == 0 && failed == 1 {
 			logger.Info("Job Failed")
 			return ctrl.Result{}, nil // failed
 		}
 	}
-
-	logger.Info("successfully created a Job!")
-	return ctrl.Result{}, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

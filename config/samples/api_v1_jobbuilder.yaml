@@ -10,6 +10,8 @@ metadata:
     accounts: "1234"
   name: jobbuilder-sample
 spec:
-  scriptUrls: s3://stage-cf-worker/398803b74bcdb1b454434669bc634190/wasm-worker
+  scriptUrls:
+    - s3://stage-cf-worker/398803b74bcdb1b454434669bc634190/wasm-worker
+    - s3://stage-cf-worker/398803b74bcdb1b454434669bc634190/hello
   targetImage: clementreiffers/artist-worker
-  workerBundle: worker-bundle-name
+  workerBundleName: worker-bundle-name
