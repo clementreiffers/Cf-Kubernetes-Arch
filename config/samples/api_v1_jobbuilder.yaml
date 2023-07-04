@@ -12,3 +12,4 @@ metadata:
 spec:
   scriptUrls: s3://stage-cf-worker/398803b74bcdb1b454434669bc634190/wasm-worker
   targetImage: clementreiffers/artist-worker
+  workerBundle: worker-bundle-name

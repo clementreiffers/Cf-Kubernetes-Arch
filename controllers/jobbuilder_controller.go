@@ -81,6 +81,23 @@ func (r *JobBuilderReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		return ctrl.Result{}, err
 	}
 
+	for {
+		foundJob := &batchv1.Job{}
+		err = r.Get(ctx, types.NamespacedName{Name: job.Name, Namespace: job.GetNamespace()}, foundJob)
+		if err != nil {
+			logger.Error(err, "couldn't get the job status")
+		}
+		succeeded := foundJob.Status.Succeeded
+		failed := foundJob.Status.Failed
+		if succeeded == 1 && failed == 0 {
+			logger.Info("Job Successful") //update workerBundle here
+			break
+		} else if succeeded == 0 && failed == 1 {
+			logger.Info("Job Failed")
+			return ctrl.Result{}, nil // failed
+		}
+	}
+
 	logger.Info("successfully created a Job!")
 	return ctrl.Result{}, nil
 }
