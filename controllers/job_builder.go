@@ -73,14 +73,14 @@ func generateCapnp() v1.Container {
 	}
 }
 
-func generateKaniko() v1.Container {
+func generateKaniko(instance *apiv1.JobBuilder) v1.Container {
 	return v1.Container{
 		Name:  "kaniko",
 		Image: "gcr.io/kaniko-project/executor:latest",
 		Args: []string{
 			"--dockerfile=Dockerfile",
 			"--context=/context",
-			"--destination=clementreiffers/artist-worker:latest",
+			fmt.Sprintf("--destination=%s", instance.Spec.TargetImage),
 		},
 		VolumeMounts: []v1.VolumeMount{
 			{Name: "registry-credentials", MountPath: "/kaniko/.docker/", ReadOnly: true},
@@ -146,7 +146,7 @@ func generateVolumes() []v1.Volume {
 }
 
 func createJob(instance *apiv1.JobBuilder) batchv1.Job {
-	//ttl := int32(3600)
+	ttl := int32(3600)
 	return batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      getJobName(instance.Name),
@@ -155,7 +155,7 @@ func createJob(instance *apiv1.JobBuilder) batchv1.Job {
 		Spec: batchv1.JobSpec{
 			//Parallelism: new(int32),
 			//Completions: new(int32),
-			//TTLSecondsAfterFinished: &ttl,
+			TTLSecondsAfterFinished: &ttl,
 			Template: v1.PodTemplateSpec{
 				Spec: v1.PodSpec{
 					InitContainers: []v1.Container{
@@ -164,7 +164,7 @@ func createJob(instance *apiv1.JobBuilder) batchv1.Job {
 						generateCapnp(),
 					},
 					Containers: []v1.Container{
-						generateKaniko(),
+						generateKaniko(instance),
 					},
 					Volumes:       generateVolumes(),
 					RestartPolicy: "Never",
