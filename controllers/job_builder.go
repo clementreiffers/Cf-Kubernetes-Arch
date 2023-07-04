@@ -142,8 +142,8 @@ func createJob(instance *apiv1.JobBuilder) batchv1.Job {
 			Namespace: "default",
 		},
 		Spec: batchv1.JobSpec{
-			Parallelism: new(int32),
-			Completions: new(int32),
+			//Parallelism: new(int32),
+			//Completions: new(int32),
 			//TTLSecondsAfterFinished: &ttl,
 			Template: v1.PodTemplateSpec{
 				Spec: v1.PodSpec{
