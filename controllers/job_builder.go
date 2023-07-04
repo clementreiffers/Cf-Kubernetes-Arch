@@ -6,6 +6,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apiv1 "operators/WorkerBundle/api/v1"
+	"strings"
 )
 
 func generateAwsConfig() []v1.EnvVar {
@@ -16,27 +17,13 @@ func generateAwsConfig() []v1.EnvVar {
 	}
 }
 
-func generateAwsCommandSync(scriptUrls []string, finalPath string) []string {
+func generateAwsCommandSync(scriptUrls []string, finalPath string) string {
 	personalizedAws := "aws --endpoint-url=$(AWS_ENDPOINT) s3 sync"
 	var commands []string
-	for index, url := range scriptUrls {
-		if index == 0 {
-			err := append(commands, fmt.Sprintf("%s %s", personalizedAws, url))
-			if err != nil {
-				return err
-			}
-		} else {
-			err := append(commands, fmt.Sprintf("&& %s %s", personalizedAws, url))
-			if err != nil {
-				return err
-			}
-		}
+	for _, url := range scriptUrls {
+		commands = append(commands, fmt.Sprintf(" %s %s %s", personalizedAws, url, finalPath))
 	}
-	err := append(commands, finalPath)
-	if err != nil {
-		return err
-	}
-	return commands
+	return strings.Join(commands, " && ")
 }
 
 func generateDownloadFilesContainer(instance *apiv1.JobBuilder) v1.Container {
@@ -49,7 +36,7 @@ func generateDownloadFilesContainer(instance *apiv1.JobBuilder) v1.Container {
 			{Name: "s3-config", MountPath: "/root/.aws", ReadOnly: true},
 			{Name: "context", MountPath: "/context"},
 		},
-		Command: generateAwsCommandSync(instance.Spec.ScriptUrls, "/context"),
+		Command: []string{generateAwsCommandSync(instance.Spec.ScriptUrls, "/context")},
 	}
 }
 

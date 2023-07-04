@@ -92,7 +92,6 @@ stateDiagram-v2
     WorkerDeployment --> WorkerRelease : apply
     WorkerRelease --> JobBuilder : create
     JobBuilder --> Registry : push
-    WorkerRelease --> WorkerBundle
     WorkerAccount --> WorkerBundle : create
     WorkerBundle --> Deployment : create
     Registry --> Deployment : pull
@@ -194,7 +193,9 @@ metadata:
   labels:
     accounts: "1234"
 spec:
-  scriptUrls: "s3://path/to/dir/version/"
+  scriptUrls:
+    - s3://stage-cf-worker/398803b74bcdb1b454434669bc634190/wasm-worker
+    - s3://stage-cf-worker/398803b74bcdb1b454434669bc634190/hello
   targetImage: clementreiffers/artist-worker
   workerBundleName: worker-bundle-name
 ```
