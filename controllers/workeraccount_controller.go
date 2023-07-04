@@ -18,6 +18,9 @@ package controllers
 
 import (
 	"context"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -37,19 +40,51 @@ type WorkerAccountReconciler struct {
 //+kubebuilder:rbac:groups=api.cf-worker,resources=workeraccounts/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=api.cf-worker,resources=workeraccounts/finalizers,verbs=update
 
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the WorkerAccount object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.14.1/pkg/reconcile
-func (r *WorkerAccountReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+func createWorkerBundle(instance *apiv1.WorkerAccount) apiv1.WorkerBundle {
+	return apiv1.WorkerBundle{
+		ObjectMeta: metav1.ObjectMeta{Name: instance.Spec.WorkerBundleName, Namespace: instance.GetNamespace()},
+		Spec: apiv1.WorkerBundleSpec{
+			DeploymentName: instance.Spec.WorkerBundleName,
+			PodTemplate: apiv1.WorkerBundlePodTemplate{
+				ImagePullSecret: instance.Spec.PodTemplate.ImagePullSecret,
+				Image:           "nginx",
+			},
+		},
+	}
+}
+func workerAccountApplyResource(r *WorkerAccountReconciler, ctx context.Context, resource client.Object, foundResource client.Object) error {
+	err := r.Get(ctx, types.NamespacedName{Name: resource.GetName(), Namespace: resource.GetNamespace()}, foundResource)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.Create(ctx, resource)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	return err
+}
 
-	// TODO(user): your logic here
+func (r *WorkerAccountReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	logger := log.Log.WithValues("WorkerAccount", req.NamespacedName)
+
+	instance := &apiv1.WorkerAccount{}
+	err := r.Get(ctx, req.NamespacedName, instance)
+
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return ctrl.Result{}, nil
+		}
+		return ctrl.Result{}, err
+	}
+
+	workerBundle := createWorkerBundle(instance)
+	err = workerAccountApplyResource(r, ctx, &workerBundle, &apiv1.WorkerBundle{})
+	if err != nil {
+		logger.Error(err, "unable to create WorkerBundle")
+		return ctrl.Result{}, err
+	}
+
+	logger.Info("successfully created a worker bundle!")
 
 	return ctrl.Result{}, nil
 }

@@ -30,16 +30,16 @@ type Worker struct {
 	SecretRef    string `json:"secretRef"`
 }
 
-type PodTemplate struct {
-	Image           string `json:"image"`
+type WorkerBundlePodTemplate struct {
+	Image           string `json:"image,omitempty"`
 	ImagePullSecret string `json:"imagePullSecret"`
 }
 
 // WorkerBundleSpec defines the desired state of WorkerBundle
 type WorkerBundleSpec struct {
-	DeploymentName string      `json:"deploymentName"`
-	Workers        []Worker    `json:"workers"`
-	PodTemplate    PodTemplate `json:"podTemplate"`
+	DeploymentName string                  `json:"deploymentName"`
+	Workers        []Worker                `json:"workers,omitempty"`
+	PodTemplate    WorkerBundlePodTemplate `json:"podTemplate"`
 }
 
 // WorkerBundleStatus defines the observed state of WorkerBundle

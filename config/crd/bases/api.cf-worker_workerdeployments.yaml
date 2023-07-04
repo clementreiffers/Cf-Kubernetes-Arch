@@ -33,12 +33,31 @@ spec:
           metadata:
             type: object
           spec:
-            description: WorkerDeploymentSpec defines the desired state of WorkerDeployment
             properties:
-              foo:
-                description: Foo is an example field of WorkerDeployment. Edit workerdeployment_types.go
-                  to remove/update
-                type: string
+              releaseHistoryLimit:
+                format: int32
+                type: integer
+              template:
+                properties:
+                  compatibilityDate:
+                    type: string
+                  scriptName:
+                    type: string
+                  scriptsUrls:
+                    items:
+                      type: string
+                    type: array
+                  secretRef:
+                    type: string
+                required:
+                - compatibilityDate
+                - scriptName
+                - scriptsUrls
+                - secretRef
+                type: object
+            required:
+            - releaseHistoryLimit
+            - template
             type: object
           status:
             description: WorkerDeploymentStatus defines the observed state of WorkerDeployment

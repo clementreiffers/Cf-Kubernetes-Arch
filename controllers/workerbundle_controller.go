@@ -22,9 +22,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/types"
-
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -36,6 +35,18 @@ import (
 type WorkerBundleReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
+}
+
+func workerBundleApplyResource(r *WorkerBundleReconciler, ctx context.Context, resource client.Object, foundResource client.Object) error {
+	err := r.Get(ctx, types.NamespacedName{Name: resource.GetName(), Namespace: resource.GetNamespace()}, foundResource)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.Create(ctx, resource)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	return err
 }
 
 //+kubebuilder:rbac:groups=api.cf-worker,resources=workerbundles,verbs=get;list;watch;create;update;patch;delete
@@ -51,20 +62,9 @@ type WorkerBundleReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.14.1/pkg/reconcile
-func applyResource(r *WorkerBundleReconciler, ctx context.Context, resource client.Object, foundResource client.Object) error {
-	err := r.Get(ctx, types.NamespacedName{Name: resource.GetName(), Namespace: resource.GetNamespace()}, foundResource)
-	if err != nil && errors.IsNotFound(err) {
-		err = r.Create(ctx, resource)
-		if err != nil {
-			return err
-		}
-		return nil
-	}
-	return err
-}
 
 func (r *WorkerBundleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	logger := log.Log.WithValues("PodInstanciator", req.NamespacedName)
+	logger := log.Log.WithValues("WorkerBundle", req.NamespacedName)
 
 	instance := &apiv1.WorkerBundle{}
 	err := r.Get(ctx, req.NamespacedName, instance)
@@ -76,21 +76,28 @@ func (r *WorkerBundleReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{}, err
 	}
 
+	workers := instance.Spec.Workers
+
+	if len(workers) == 0 {
+		logger.Info("no workers defined")
+		return ctrl.Result{}, nil
+	}
+
 	depl := createDeployment(instance)
 	svc := createService(instance)
 	ing := createIngress(instance)
 
-	err = applyResource(r, ctx, &depl, &appsv1.Deployment{})
+	err = workerBundleApplyResource(r, ctx, &depl, &appsv1.Deployment{})
 	if err != nil {
 		logger.Error(err, "unable to create Deployment")
 		return ctrl.Result{}, err
 	}
-	err = applyResource(r, ctx, svc, &corev1.Service{})
+	err = workerBundleApplyResource(r, ctx, svc, &corev1.Service{})
 	if err != nil {
 		logger.Error(err, "unable to create Service")
 		return ctrl.Result{}, err
 	}
-	err = applyResource(r, ctx, ing, &networkingv1.Ingress{})
+	err = workerBundleApplyResource(r, ctx, ing, &networkingv1.Ingress{})
 	if err != nil {
 		logger.Error(err, "unable to create Ingress")
 		return ctrl.Result{}, err

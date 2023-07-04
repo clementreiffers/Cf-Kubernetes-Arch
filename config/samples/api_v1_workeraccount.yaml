@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/created-by: workerbundle
   name: workeraccount-sample
 spec:
-  workerBundleName: "workerBundleName"
+  workerBundleName: worker-bundle-name
   workerReleaseSelector:
     matchLabels:
       accounts: "1234"

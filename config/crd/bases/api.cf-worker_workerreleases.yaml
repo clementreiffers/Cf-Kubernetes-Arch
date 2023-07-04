@@ -35,10 +35,21 @@ spec:
           spec:
             description: WorkerReleaseSpec defines the desired state of WorkerRelease
             properties:
-              foo:
-                description: Foo is an example field of WorkerRelease. Edit workerrelease_types.go
-                  to remove/update
+              compatibilityDate:
                 type: string
+              scriptName:
+                type: string
+              scriptUrls:
+                items:
+                  type: string
+                type: array
+              secretRef:
+                type: string
+            required:
+            - compatibilityDate
+            - scriptName
+            - scriptUrls
+            - secretRef
             type: object
           status:
             description: WorkerReleaseStatus defines the observed state of WorkerRelease

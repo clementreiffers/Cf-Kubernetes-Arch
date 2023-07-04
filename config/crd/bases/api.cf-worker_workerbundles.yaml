@@ -44,7 +44,6 @@ spec:
                   imagePullSecret:
                     type: string
                 required:
-                - image
                 - imagePullSecret
                 type: object
               workers:
@@ -69,7 +68,6 @@ spec:
             required:
             - deploymentName
             - podTemplate
-            - workers
             type: object
           status:
             description: WorkerBundleStatus defines the observed state of WorkerBundle
