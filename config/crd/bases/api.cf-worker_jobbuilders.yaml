@@ -35,10 +35,13 @@ spec:
           spec:
             description: JobBuilderSpec defines the desired state of JobBuilder
             properties:
-              foo:
-                description: Foo is an example field of JobBuilder. Edit jobbuilder_types.go
-                  to remove/update
+              scriptUrls:
                 type: string
+              targetImage:
+                type: string
+            required:
+            - scriptUrls
+            - targetImage
             type: object
           status:
             description: JobBuilderStatus defines the observed state of JobBuilder

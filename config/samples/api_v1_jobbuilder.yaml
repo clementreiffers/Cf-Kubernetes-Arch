@@ -7,6 +7,8 @@ metadata:
     app.kubernetes.io/part-of: workerbundle
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: workerbundle
+    accounts: "1234"
   name: jobbuilder-sample
 spec:
-  # TODO(user): Add fields here
+  scriptUrls: s3://stage-cf-worker/398803b74bcdb1b454434669bc634190/wasm-worker
+  targetImage: clementreiffers/artist-worker

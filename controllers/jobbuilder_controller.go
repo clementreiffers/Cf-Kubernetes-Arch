@@ -18,6 +18,9 @@ package controllers
 
 import (
 	"context"
+	batchv1 "k8s.io/api/batch/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/types"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -46,11 +49,39 @@ type JobBuilderReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.14.1/pkg/reconcile
+func jobBuilderApplyResource(r *JobBuilderReconciler, ctx context.Context, resource client.Object, foundResource client.Object) error {
+	err := r.Get(ctx, types.NamespacedName{Name: resource.GetName(), Namespace: resource.GetNamespace()}, foundResource)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.Create(ctx, resource)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	return err
+}
+
 func (r *JobBuilderReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	logger := log.Log.WithValues("JobBuilder", req.NamespacedName)
 
-	// TODO(user): your logic here
+	instance := &apiv1.JobBuilder{}
+	err := r.Get(ctx, req.NamespacedName, instance)
 
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return ctrl.Result{}, nil
+		}
+		return ctrl.Result{}, err
+	}
+
+	job := createJob(instance)
+	err = jobBuilderApplyResource(r, ctx, &job, &batchv1.Job{})
+	if err != nil {
+		logger.Error(err, "unable to create Job")
+		return ctrl.Result{}, err
+	}
+
+	logger.Info("successfully created a Job!")
 	return ctrl.Result{}, nil
 }
 

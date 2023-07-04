@@ -21,3 +21,7 @@ func getIngressPathName(port apiv1.Worker) string {
 func getDeploymentName(instance string) string {
 	return instance + "-depl"
 }
+
+func getJobName(instance string) string {
+	return instance + "-job"
+}
