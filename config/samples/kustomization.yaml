@@ -5,4 +5,5 @@ resources:
 - api_v1_jobbuilder.yaml
 - api_v1_workeraccount.yaml
 - api_v1_workerdeployment.yaml
+- api_v1_workerversion.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples

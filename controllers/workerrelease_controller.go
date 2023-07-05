@@ -18,6 +18,8 @@ package controllers
 
 import (
 	"context"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -37,20 +39,33 @@ type WorkerReleaseReconciler struct {
 //+kubebuilder:rbac:groups=api.cf-worker,resources=workerreleases/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=api.cf-worker,resources=workerreleases/finalizers,verbs=update
 
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the WorkerRelease object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.14.1/pkg/reconcile
+func createJobBuilder(instance *apiv1.WorkerRelease) apiv1.JobBuilder {
+	return apiv1.JobBuilder{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      getJobName(instance.GetName()),
+			Namespace: instance.GetNamespace()},
+		Spec: apiv1.JobBuilderSpec{
+			ScriptUrls:       nil,
+			TargetImage:      "",
+			WorkerBundleName: "",
+			ScriptNames:      nil,
+		},
+	}
+}
+
 func (r *WorkerReleaseReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	logger := log.Log.WithValues("JobBuilder", req.NamespacedName)
 
-	// TODO(user): your logic here
+	instance := &apiv1.WorkerRelease{}
+	err := r.Get(ctx, req.NamespacedName, instance)
 
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return ctrl.Result{}, nil
+		}
+		return ctrl.Result{}, err
+	}
+	logger.Info("successfully created a JobBuilder!")
 	return ctrl.Result{}, nil
 }
 

@@ -1,0 +1,14 @@
+apiVersion: api.cf-worker/v1
+kind: WorkerVersion
+metadata:
+  labels:
+    app.kubernetes.io/name: workerversion
+    app.kubernetes.io/instance: workerversion-sample
+    app.kubernetes.io/part-of: workerbundle
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: workerbundle
+  name: workerversion-sample
+spec:
+  accounts: "1234"
+  scripts: wasm-worker
+  url: s3://stage-cf-worker/398803b74bcdb1b454434669bc634190/wasm-worker

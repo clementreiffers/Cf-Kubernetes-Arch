@@ -56,4 +56,13 @@ resources:
   kind: WorkerDeployment
   path: operators/WorkerBundle/api/v1
   version: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: cf-worker
+  group: api
+  kind: WorkerVersion
+  path: operators/WorkerBundle/api/v1
+  version: v1
 version: "3"
