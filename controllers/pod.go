@@ -31,10 +31,11 @@ func createPodSpec(instance *apiv1.WorkerBundle) v1.PodSpec {
 }
 
 func createDeployment(instance *apiv1.WorkerBundle) appsv1.Deployment {
+	replicas := int32(1)
 	return appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{Namespace: instance.GetNamespace(), Name: getDeploymentName(instance.Spec.DeploymentName)},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: new(int32),
+			Replicas: &replicas,
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{"app": getPodName(instance.Spec.DeploymentName)},
 			},

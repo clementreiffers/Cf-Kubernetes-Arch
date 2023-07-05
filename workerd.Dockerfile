@@ -1,4 +1,4 @@
-FROM clementreiffers/workerd-builder AS builder
+FROM clementreiffers/worker-builder AS builder
 
 COPY ./ ./
 
