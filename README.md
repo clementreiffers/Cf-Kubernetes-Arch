@@ -78,6 +78,7 @@ More information can be found via the [Kubebuilder Documentation](https://book.k
 
 ## Architecture
 
+### v1
 ```mermaid
 stateDiagram-v2
     state First {
@@ -113,8 +114,8 @@ spec:
       secretRef: "secret-accounts-ref" # prefix WASM_WORKER_ toutes les var d'env
       compatibilityDate: "MM/DD/YYYY"
       scriptUrls:
-        - "s3://path/to/dir/version/files1"
-        - "s3://path/to/dir/version/files2"
+          - s3://stage-cf-worker/398803b74bcdb1b454434669bc634190/wasm-worker
+          - s3://stage-cf-worker/398803b74bcdb1b454434669bc634190/hello
   releaseHistoryLimit: 10 # ne pas avoir trop de release
 ```
 
@@ -201,6 +202,56 @@ spec:
     - s3://stage-cf-worker/398803b74bcdb1b454434669bc634190/hello
   targetImage: clementreiffers/artist-worker
   workerBundleName: worker-bundle-name
+```
+
+### v2 
+
+```mermaid
+stateDiagram-v2
+    state First {
+        JobBuilder
+        Registry
+    }
+    state Second {
+        WorkerBundle
+        Deployment
+    }
+    FakeCfApi --> WorkerVersion : create
+    WorkerVersion --> WorkerRelease : create or update
+    WorkerRelease --> JobBuilder : create
+    JobBuilder --> Registry : push
+    WorkerAccount --> WorkerBundle : create
+    WorkerBundle --> Deployment : create
+    Registry --> Deployment : pull
+    JobBuilder --> WorkerBundle : update while finished
+```
+### WorkerVersion
+```yaml
+apiVersion: api.cf-worker/v1
+kind: WorkerVersion
+metadata:
+  name: wasm-worker-version-5
+  labels:
+    accounts: "1234"
+spec:
+  accounts: "1234"
+  scripts: wasm-worker
+  url: s3://stage-cf-worker/398803b74bcdb1b454434669bc634190/wasm-worker
+```
+
+### WorkerRelease
+
+```yaml
+apiVersion: api.cf-worker/v1
+kind: WorkerRelease
+metadata:
+  name: worker-release-1234
+  labels:
+    accounts: "1234"
+spec:
+  workerVersions:
+    - wasm-worker : wasm-worker-version-5
+    - artist-worker : artist-worker-version-3
 ```
 
 ## License

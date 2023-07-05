@@ -18,6 +18,10 @@ package controllers
 
 import (
 	"context"
+	"fmt"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -37,21 +41,82 @@ type WorkerReleaseReconciler struct {
 //+kubebuilder:rbac:groups=api.cf-worker,resources=workerreleases/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=api.cf-worker,resources=workerreleases/finalizers,verbs=update
 
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the WorkerRelease object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.14.1/pkg/reconcile
+func getAllScriptsUrls(instance *apiv1.WorkerRelease) []string {
+	values := make([]string, 0, len(instance.Spec.WorkerVersions))
+	for _, value := range instance.Spec.WorkerVersions {
+		values = append(values, value)
+	}
+	return values
+}
+
+func getAllScriptNames(instance *apiv1.WorkerRelease) []string {
+	keys := make([]string, 0, len(instance.Spec.WorkerVersions))
+	for key := range instance.Spec.WorkerVersions {
+		keys = append(keys, key)
+	}
+	return keys
+}
+
+func createJobBuilder(instance *apiv1.WorkerRelease, bundleName string) apiv1.JobBuilder {
+	return apiv1.JobBuilder{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      instance.Spec.Accounts,
+			Namespace: instance.GetNamespace()},
+		Spec: apiv1.JobBuilderSpec{
+			ScriptUrls:       getAllScriptsUrls(instance),
+			TargetImage:      fmt.Sprintf("build-%s", instance.Spec.Accounts),
+			WorkerBundleName: bundleName,
+			ScriptNames:      getAllScriptNames(instance),
+		},
+	}
+}
+
 func (r *WorkerReleaseReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	logger := log.Log.WithValues("JobBuilder", req.NamespacedName)
 
-	// TODO(user): your logic here
+	instance := &apiv1.WorkerRelease{}
+	err := r.Get(ctx, req.NamespacedName, instance)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return ctrl.Result{}, nil
+		}
+		return ctrl.Result{}, err
+	}
 
-	return ctrl.Result{}, nil
+	workerAccount := apiv1.WorkerAccount{}
+	err = r.Get(ctx, types.NamespacedName{Name: instance.Spec.Accounts, Namespace: instance.GetNamespace()}, &workerAccount)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	bundleName := workerAccount.Spec.WorkerBundleName
+
+	jobBuilder := apiv1.JobBuilder{}
+	err = r.Get(ctx, types.NamespacedName{Name: instance.Spec.Accounts, Namespace: instance.GetNamespace()}, &jobBuilder)
+	if err != nil {
+		jobBuilder := createJobBuilder(instance, bundleName)
+		err = r.Create(ctx, &jobBuilder)
+		if err != nil {
+			logger.Error(err, "unable to create a JobBuilder")
+			return ctrl.Result{}, err
+		}
+		logger.Info("JobBuilder created!")
+		return ctrl.Result{}, nil
+	} else {
+		err = r.Delete(ctx, &jobBuilder)
+		if err != nil {
+			logger.Error(err, "unable to destroy the job builder")
+			return ctrl.Result{}, err
+		}
+		jobBuilder := createJobBuilder(instance, bundleName)
+		err = r.Create(ctx, &jobBuilder)
+		if err != nil {
+			logger.Error(err, "unable to create a JobBuilder")
+			return ctrl.Result{}, err
+		}
+		logger.Info("JobBuilder created!")
+		return ctrl.Result{}, nil
+	}
 }
 
 // SetupWithManager sets up the controller with the Manager.

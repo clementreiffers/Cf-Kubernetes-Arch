@@ -23,14 +23,15 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// WorkerReleaseSpec defines the desired state of WorkerRelease
-type WorkerReleaseSpec struct {
-	WorkerVersions map[string]string `json:"workerVersions"`
-	Accounts       string            `json:"accounts"`
+// WorkerVersionSpec defines the desired state of WorkerVersion
+type WorkerVersionSpec struct {
+	Accounts string `json:"accounts"`
+	Scripts  string `json:"scripts"`
+	Url      string `json:"url"`
 }
 
-// WorkerReleaseStatus defines the observed state of WorkerRelease
-type WorkerReleaseStatus struct {
+// WorkerVersionStatus defines the observed state of WorkerVersion
+type WorkerVersionStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 }
@@ -38,24 +39,24 @@ type WorkerReleaseStatus struct {
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
-// WorkerRelease is the Schema for the workerreleases API
-type WorkerRelease struct {
+// WorkerVersion is the Schema for the workerversions API
+type WorkerVersion struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   WorkerReleaseSpec   `json:"spec,omitempty"`
-	Status WorkerReleaseStatus `json:"status,omitempty"`
+	Spec   WorkerVersionSpec   `json:"spec,omitempty"`
+	Status WorkerVersionStatus `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 
-// WorkerReleaseList contains a list of WorkerRelease
-type WorkerReleaseList struct {
+// WorkerVersionList contains a list of WorkerVersion
+type WorkerVersionList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []WorkerRelease `json:"items"`
+	Items           []WorkerVersion `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&WorkerRelease{}, &WorkerReleaseList{})
+	SchemeBuilder.Register(&WorkerVersion{}, &WorkerVersionList{})
 }

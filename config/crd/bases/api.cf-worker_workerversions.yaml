@@ -5,20 +5,20 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.11.1
   creationTimestamp: null
-  name: workerreleases.api.cf-worker
+  name: workerversions.api.cf-worker
 spec:
   group: api.cf-worker
   names:
-    kind: WorkerRelease
-    listKind: WorkerReleaseList
-    plural: workerreleases
-    singular: workerrelease
+    kind: WorkerVersion
+    listKind: WorkerVersionList
+    plural: workerversions
+    singular: workerversion
   scope: Namespaced
   versions:
   - name: v1
     schema:
       openAPIV3Schema:
-        description: WorkerRelease is the Schema for the workerreleases API
+        description: WorkerVersion is the Schema for the workerversions API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -33,20 +33,21 @@ spec:
           metadata:
             type: object
           spec:
-            description: WorkerReleaseSpec defines the desired state of WorkerRelease
+            description: WorkerVersionSpec defines the desired state of WorkerVersion
             properties:
               accounts:
                 type: string
-              workerVersions:
-                additionalProperties:
-                  type: string
-                type: object
+              scripts:
+                type: string
+              url:
+                type: string
             required:
             - accounts
-            - workerVersions
+            - scripts
+            - url
             type: object
           status:
-            description: WorkerReleaseStatus defines the observed state of WorkerRelease
+            description: WorkerVersionStatus defines the observed state of WorkerVersion
             type: object
         type: object
     served: true

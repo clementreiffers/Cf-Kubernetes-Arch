@@ -135,3 +135,29 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - api.cf-worker
+  resources:
+  - workerversions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - api.cf-worker
+  resources:
+  - workerversions/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - api.cf-worker
+  resources:
+  - workerversions/status
+  verbs:
+  - get
+  - patch
+  - update

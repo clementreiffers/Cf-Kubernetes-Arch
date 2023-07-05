@@ -1,6 +1,9 @@
 package controllers
 
-import apiv1 "operators/WorkerBundle/api/v1"
+import (
+	"fmt"
+	apiv1 "operators/WorkerBundle/api/v1"
+)
 
 func getPodName(instance string) string {
 	return instance + "-pod"
@@ -24,4 +27,8 @@ func getDeploymentName(instance string) string {
 
 func getJobName(instance string) string {
 	return instance + "-job"
+}
+
+func getWorkerRelease(instance string) string {
+	return fmt.Sprintf("worker-release-%s", instance)
 }

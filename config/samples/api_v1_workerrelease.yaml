@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/part-of: workerbundle
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: workerbundle
-  name: workerrelease-sample
+  name: "1234" #accounts
 spec:
   scriptName: wasm-worker
   secretRef: "secret-accounts-ref" # prefix WASM_WORKER_ toutes les var d'env
