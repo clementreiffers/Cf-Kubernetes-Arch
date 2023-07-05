@@ -61,6 +61,18 @@ func jobBuilderApplyResource(r *JobBuilderReconciler, ctx context.Context, resou
 	return err
 }
 
+func generateWorkers(scriptNames []string) []apiv1.Worker {
+	var workers []apiv1.Worker
+	for index, scriptName := range scriptNames {
+		workers = append(workers, apiv1.Worker{
+			WorkerName:   scriptName,
+			WorkerNumber: int32(8080 + index),
+		})
+	}
+
+	return workers
+}
+
 func (r *JobBuilderReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := log.Log.WithValues("JobBuilder", req.NamespacedName)
 
@@ -96,14 +108,12 @@ func (r *JobBuilderReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 			err = r.Get(ctx, types.NamespacedName{Name: instance.Spec.WorkerBundleName, Namespace: instance.GetNamespace()}, bundle)
 
 			bundle.Spec = apiv1.WorkerBundleSpec{
-				Workers: []apiv1.Worker{
-					{
-						WorkerName:   "",
-						WorkerNumber: 0,
-						EnvPrefix:    "",
-						SecretRef:    "",
-					},
+				DeploymentName: bundle.Spec.DeploymentName,
+				PodTemplate: apiv1.WorkerBundlePodTemplate{
+					Image:           instance.Spec.TargetImage,
+					ImagePullSecret: "",
 				},
+				Workers: generateWorkers(instance.Spec.ScriptNames),
 			}
 
 			err = r.Update(ctx, bundle)

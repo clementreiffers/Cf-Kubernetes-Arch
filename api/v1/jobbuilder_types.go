@@ -28,6 +28,7 @@ type JobBuilderSpec struct {
 	ScriptUrls       []string `json:"scriptUrls"`
 	TargetImage      string   `json:"targetImage"`
 	WorkerBundleName string   `json:"workerBundleName"`
+	ScriptNames      []string `json:"scriptNames"`
 }
 
 // JobBuilderStatus defines the observed state of JobBuilder

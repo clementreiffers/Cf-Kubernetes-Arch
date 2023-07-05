@@ -35,6 +35,10 @@ spec:
           spec:
             description: JobBuilderSpec defines the desired state of JobBuilder
             properties:
+              scriptNames:
+                items:
+                  type: string
+                type: array
               scriptUrls:
                 items:
                   type: string
@@ -44,6 +48,7 @@ spec:
               workerBundleName:
                 type: string
             required:
+            - scriptNames
             - scriptUrls
             - targetImage
             - workerBundleName
