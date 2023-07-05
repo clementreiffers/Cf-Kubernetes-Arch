@@ -35,21 +35,12 @@ spec:
           spec:
             description: WorkerReleaseSpec defines the desired state of WorkerRelease
             properties:
-              compatibilityDate:
-                type: string
-              scriptName:
-                type: string
-              scriptUrls:
-                items:
+              workerVersions:
+                additionalProperties:
                   type: string
-                type: array
-              secretRef:
-                type: string
+                type: object
             required:
-            - compatibilityDate
-            - scriptName
-            - scriptUrls
-            - secretRef
+            - workerVersions
             type: object
           status:
             description: WorkerReleaseStatus defines the observed state of WorkerRelease

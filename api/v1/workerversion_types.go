@@ -26,7 +26,7 @@ import (
 // WorkerVersionSpec defines the desired state of WorkerVersion
 type WorkerVersionSpec struct {
 	Accounts string `json:"accounts"`
-	Scripts  string `json:"script"`
+	Scripts  string `json:"scripts"`
 	Url      string `json:"url"`
 }
 

@@ -35,10 +35,16 @@ spec:
           spec:
             description: WorkerVersionSpec defines the desired state of WorkerVersion
             properties:
-              foo:
-                description: Foo is an example field of WorkerVersion. Edit workerversion_types.go
-                  to remove/update
+              accounts:
                 type: string
+              scripts:
+                type: string
+              url:
+                type: string
+            required:
+            - accounts
+            - scripts
+            - url
             type: object
           status:
             description: WorkerVersionStatus defines the observed state of WorkerVersion

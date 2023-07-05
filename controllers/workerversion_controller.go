@@ -18,6 +18,9 @@ package controllers
 
 import (
 	"context"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -46,11 +49,50 @@ type WorkerVersionReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.14.1/pkg/reconcile
+
+func createWorkerRelease(instance *apiv1.WorkerVersion) apiv1.WorkerRelease {
+	return apiv1.WorkerRelease{
+		ObjectMeta: metav1.ObjectMeta{Name: getWorkerRelease(instance.Spec.Accounts), Namespace: instance.GetNamespace()},
+		Spec: apiv1.WorkerReleaseSpec{WorkerVersions: map[string]string{
+			instance.Spec.Scripts: instance.Spec.Url,
+		}},
+	}
+}
+
 func (r *WorkerVersionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := log.Log.WithValues("WorkerVersion", req.NamespacedName)
 
-	logger.Info("successfully created a WorkerVersion")
-	return ctrl.Result{}, nil
+	instance := &apiv1.WorkerVersion{}
+	err := r.Get(ctx, req.NamespacedName, instance)
+
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return ctrl.Result{}, nil
+		}
+		return ctrl.Result{}, err
+	}
+
+	workerRelease := apiv1.WorkerRelease{}
+	err = r.Get(ctx, types.NamespacedName{Name: getWorkerRelease(instance.Spec.Accounts), Namespace: instance.GetNamespace()}, &workerRelease)
+	if err != nil {
+		workerRelease := createWorkerRelease(instance)
+		err = r.Create(ctx, &workerRelease)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		logger.Info("WorkerRelease created!")
+		return ctrl.Result{}, nil
+
+	} else {
+		workerRelease.Spec.WorkerVersions[instance.Spec.Scripts] = instance.Spec.Url
+		err = r.Update(ctx, &workerRelease)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		logger.Info("WorkerRelease updated!")
+		return ctrl.Result{}, nil
+	}
+
 }
 
 // SetupWithManager sets up the controller with the Manager.

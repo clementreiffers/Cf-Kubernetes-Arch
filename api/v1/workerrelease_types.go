@@ -17,7 +17,7 @@ limitations under the License.
 package v1
 
 import (
-	  metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -25,13 +25,13 @@ import (
 
 // WorkerReleaseSpec defines the desired state of WorkerRelease
 type WorkerReleaseSpec struct {
-	  WorkerVersions map[string]string `json:"workerVersions"`
+	WorkerVersions map[string]string `json:"workerVersions"`
 }
 
 // WorkerReleaseStatus defines the observed state of WorkerRelease
 type WorkerReleaseStatus struct {
-	  // INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	  // Important: Run "make" to regenerate code after modifying this file
+	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
+	// Important: Run "make" to regenerate code after modifying this file
 }
 
 //+kubebuilder:object:root=true
@@ -39,22 +39,22 @@ type WorkerReleaseStatus struct {
 
 // WorkerRelease is the Schema for the workerreleases API
 type WorkerRelease struct {
-	  metav1.TypeMeta   `json:",inline"`
-	  metav1.ObjectMeta `json:"metadata,omitempty"`
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	  Spec   WorkerReleaseSpec   `json:"spec,omitempty"`
-	  Status WorkerReleaseStatus `json:"status,omitempty"`
+	Spec   WorkerReleaseSpec   `json:"spec,omitempty"`
+	Status WorkerReleaseStatus `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 
 // WorkerReleaseList contains a list of WorkerRelease
 type WorkerReleaseList struct {
-	  metav1.TypeMeta `json:",inline"`
-	  metav1.ListMeta `json:"metadata,omitempty"`
-	  Items           []WorkerRelease `json:"items"`
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []WorkerRelease `json:"items"`
 }
 
 func init() {
-	  SchemeBuilder.Register(&WorkerRelease{}, &WorkerReleaseList{})
+	SchemeBuilder.Register(&WorkerRelease{}, &WorkerReleaseList{})
 }
