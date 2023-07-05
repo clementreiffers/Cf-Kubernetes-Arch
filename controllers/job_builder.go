@@ -50,7 +50,7 @@ func generateGettingDockerfile() v1.Container {
 			{Name: "context", MountPath: "/context", ReadOnly: false},
 		},
 		Command: []string{"curl"},
-		Args:    []string{"-o", "/context/Dockerfile", "-L", "https://raw.githubusercontent.com/clementreiffers/JobBuilder/main/build-worker.Dockerfile"},
+		Args:    []string{"-o", "/context/Dockerfile", "-L", "https://raw.githubusercontent.com/clementreiffers/Cf-Kubernetes-Arch/main/workerd.Dockerfile"},
 	}
 }
 
