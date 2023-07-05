@@ -92,7 +92,6 @@ stateDiagram-v2
     WorkerDeployment --> WorkerRelease : apply
     WorkerRelease --> JobBuilder : create
     JobBuilder --> Registry : push
-    WorkerRelease --> WorkerBundle
     WorkerAccount --> WorkerBundle : create
     WorkerBundle --> Deployment : create
     Registry --> Deployment : pull
@@ -102,7 +101,7 @@ stateDiagram-v2
 ### WorkerDeployment
 
 ```yaml
-apiVersion: api.worker-deployment/v1alpha1
+apiVersion: api.cf-worker/v1
 kind: WorkerDeployment
 metadata:
   name: "1234" # accounts
@@ -124,7 +123,7 @@ regrouper plusieurs workerRelease par accounts
 
 rebuild: chgement du code, secrets, env, comp date...
 ```yaml
-apiVersion: api.worker-release/v1alpha1
+apiVersion: api.cf-worker/v1
 kind: WorkerRelease
 metadata:
   name: "1234" # accounts
@@ -141,7 +140,7 @@ spec:
 
 ### WorkerBundle: unique
 ```yaml
-apiVersion: api.worker-bundle/v1alpha1
+apiVersion: api.cf-worker/v1
 kind: WorkerBundle
 metadata:
   name: "1234" # accounts
@@ -170,7 +169,7 @@ spec:
 qui va ou?
 créé statiquement pour juste référencer le bundle avec l'accounts
 ```yaml
-apiVersion: api.worker-account/v1alpha1
+apiVersion: api.cf-worker/v1
 kind: WorkerAccount
 metadata:
   name: "1234" # accounts
@@ -185,6 +184,24 @@ spec:
     imagePullSecret: "insert-secret-here"
 ```
     
+### JobBuilder
+```yaml
+apiVersion: api.cf-worker/v1
+kind: JobBuilder
+metadata:
+  name: "job-builder-name"
+  labels:
+    accounts: "1234"
+spec:
+  scriptNames:
+    - wasm-worker
+    - hello
+  scriptUrls:
+    - s3://stage-cf-worker/398803b74bcdb1b454434669bc634190/wasm-worker
+    - s3://stage-cf-worker/398803b74bcdb1b454434669bc634190/hello
+  targetImage: clementreiffers/artist-worker
+  workerBundleName: worker-bundle-name
+```
 
 ## License
 

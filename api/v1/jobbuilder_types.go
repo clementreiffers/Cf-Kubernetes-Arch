@@ -25,11 +25,10 @@ import (
 
 // JobBuilderSpec defines the desired state of JobBuilder
 type JobBuilderSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
-	// Foo is an example field of JobBuilder. Edit jobbuilder_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	ScriptUrls       []string `json:"scriptUrls"`
+	TargetImage      string   `json:"targetImage"`
+	WorkerBundleName string   `json:"workerBundleName"`
+	ScriptNames      []string `json:"scriptNames"`
 }
 
 // JobBuilderStatus defines the observed state of JobBuilder

@@ -18,6 +18,9 @@ package controllers
 
 import (
 	"context"
+	batchv1 "k8s.io/api/batch/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/types"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -46,12 +49,86 @@ type JobBuilderReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.14.1/pkg/reconcile
+func jobBuilderApplyResource(r *JobBuilderReconciler, ctx context.Context, resource client.Object, foundResource client.Object) error {
+	err := r.Get(ctx, types.NamespacedName{Name: resource.GetName(), Namespace: resource.GetNamespace()}, foundResource)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.Create(ctx, resource)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	return err
+}
+
+func generateWorkers(scriptNames []string) []apiv1.Worker {
+	var workers []apiv1.Worker
+	for index, scriptName := range scriptNames {
+		workers = append(workers, apiv1.Worker{
+			WorkerName:   scriptName,
+			WorkerNumber: int32(8080 + index),
+		})
+	}
+
+	return workers
+}
+
 func (r *JobBuilderReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	logger := log.Log.WithValues("JobBuilder", req.NamespacedName)
 
-	// TODO(user): your logic here
+	instance := &apiv1.JobBuilder{}
+	err := r.Get(ctx, req.NamespacedName, instance)
 
-	return ctrl.Result{}, nil
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return ctrl.Result{}, nil
+		}
+		return ctrl.Result{}, err
+	}
+
+	job := createJob(instance)
+	err = jobBuilderApplyResource(r, ctx, &job, &batchv1.Job{})
+	if err != nil {
+		logger.Error(err, "unable to create Job")
+		return ctrl.Result{}, err
+	}
+
+	for {
+		foundJob := &batchv1.Job{}
+		err = r.Get(ctx, types.NamespacedName{Name: job.Name, Namespace: job.GetNamespace()}, foundJob)
+		if err != nil {
+			logger.Error(err, "couldn't get the job status")
+		}
+		succeeded := foundJob.Status.Succeeded
+		failed := foundJob.Status.Failed
+		if succeeded == 1 && failed == 0 {
+			logger.Info("Job Successful") //update workerBundle here
+
+			bundle := &apiv1.WorkerBundle{}
+			err = r.Get(ctx, types.NamespacedName{Name: instance.Spec.WorkerBundleName, Namespace: instance.GetNamespace()}, bundle)
+
+			bundle.Spec = apiv1.WorkerBundleSpec{
+				DeploymentName: bundle.Spec.DeploymentName,
+				PodTemplate: apiv1.WorkerBundlePodTemplate{
+					Image:           instance.Spec.TargetImage,
+					ImagePullSecret: "",
+				},
+				Workers: generateWorkers(instance.Spec.ScriptNames),
+			}
+
+			err = r.Update(ctx, bundle)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+
+			logger.Info("successfully updated bundle!")
+			return ctrl.Result{}, nil
+
+		} else if succeeded == 0 && failed == 1 {
+			logger.Info("Job Failed")
+			return ctrl.Result{}, nil // failed
+		}
+	}
 }
 
 // SetupWithManager sets up the controller with the Manager.

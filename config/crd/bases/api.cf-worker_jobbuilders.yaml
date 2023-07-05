@@ -35,10 +35,23 @@ spec:
           spec:
             description: JobBuilderSpec defines the desired state of JobBuilder
             properties:
-              foo:
-                description: Foo is an example field of JobBuilder. Edit jobbuilder_types.go
-                  to remove/update
+              scriptNames:
+                items:
+                  type: string
+                type: array
+              scriptUrls:
+                items:
+                  type: string
+                type: array
+              targetImage:
                 type: string
+              workerBundleName:
+                type: string
+            required:
+            - scriptNames
+            - scriptUrls
+            - targetImage
+            - workerBundleName
             type: object
           status:
             description: JobBuilderStatus defines the observed state of JobBuilder
