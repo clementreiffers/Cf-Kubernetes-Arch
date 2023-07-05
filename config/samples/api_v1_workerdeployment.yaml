@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/part-of: workerbundle
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: workerbundle
-  name: workerdeployment-sample
+  name: "1234" #accounts
 spec:
   template:
     scriptName: wasm-worker

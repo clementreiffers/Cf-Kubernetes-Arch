@@ -26,6 +26,7 @@ import (
 // WorkerReleaseSpec defines the desired state of WorkerRelease
 type WorkerReleaseSpec struct {
 	WorkerVersions map[string]string `json:"workerVersions"`
+	Accounts       string            `json:"accounts"`
 }
 
 // WorkerReleaseStatus defines the observed state of WorkerRelease

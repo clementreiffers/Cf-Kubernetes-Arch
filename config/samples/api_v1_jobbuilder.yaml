@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: workerbundle
     accounts: "1234"
-  name: jobbuilder-sample
+  name: "1234" #accounts
 spec:
   scriptNames:
     - wasm-worker

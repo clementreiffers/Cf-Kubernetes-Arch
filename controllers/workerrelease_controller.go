@@ -18,8 +18,10 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -39,16 +41,32 @@ type WorkerReleaseReconciler struct {
 //+kubebuilder:rbac:groups=api.cf-worker,resources=workerreleases/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=api.cf-worker,resources=workerreleases/finalizers,verbs=update
 
-func createJobBuilder(instance *apiv1.WorkerRelease) apiv1.JobBuilder {
+func getAllScriptsUrls(instance *apiv1.WorkerRelease) []string {
+	values := make([]string, 0, len(instance.Spec.WorkerVersions))
+	for _, value := range instance.Spec.WorkerVersions {
+		values = append(values, value)
+	}
+	return values
+}
+
+func getAllScriptNames(instance *apiv1.WorkerRelease) []string {
+	keys := make([]string, 0, len(instance.Spec.WorkerVersions))
+	for key := range instance.Spec.WorkerVersions {
+		keys = append(keys, key)
+	}
+	return keys
+}
+
+func createJobBuilder(instance *apiv1.WorkerRelease, bundleName string) apiv1.JobBuilder {
 	return apiv1.JobBuilder{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      getJobName(instance.GetName()),
+			Name:      instance.Spec.Accounts,
 			Namespace: instance.GetNamespace()},
 		Spec: apiv1.JobBuilderSpec{
-			ScriptUrls:       nil,
-			TargetImage:      "",
-			WorkerBundleName: "",
-			ScriptNames:      nil,
+			ScriptUrls:       getAllScriptsUrls(instance),
+			TargetImage:      fmt.Sprintf("build-%s", instance.Spec.Accounts),
+			WorkerBundleName: bundleName,
+			ScriptNames:      getAllScriptNames(instance),
 		},
 	}
 }
@@ -58,15 +76,47 @@ func (r *WorkerReleaseReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 
 	instance := &apiv1.WorkerRelease{}
 	err := r.Get(ctx, req.NamespacedName, instance)
-
 	if err != nil {
 		if errors.IsNotFound(err) {
 			return ctrl.Result{}, nil
 		}
 		return ctrl.Result{}, err
 	}
-	logger.Info("successfully created a JobBuilder!")
-	return ctrl.Result{}, nil
+
+	workerAccount := apiv1.WorkerAccount{}
+	err = r.Get(ctx, types.NamespacedName{Name: instance.Spec.Accounts, Namespace: instance.GetNamespace()}, &workerAccount)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	bundleName := workerAccount.Spec.WorkerBundleName
+
+	jobBuilder := apiv1.JobBuilder{}
+	err = r.Get(ctx, types.NamespacedName{Name: instance.Spec.Accounts, Namespace: instance.GetNamespace()}, &jobBuilder)
+	if err != nil {
+		jobBuilder := createJobBuilder(instance, bundleName)
+		err = r.Create(ctx, &jobBuilder)
+		if err != nil {
+			logger.Error(err, "unable to create a JobBuilder")
+			return ctrl.Result{}, err
+		}
+		logger.Info("JobBuilder created!")
+		return ctrl.Result{}, nil
+	} else {
+		err = r.Delete(ctx, &jobBuilder)
+		if err != nil {
+			logger.Error(err, "unable to destroy the job builder")
+			return ctrl.Result{}, err
+		}
+		jobBuilder := createJobBuilder(instance, bundleName)
+		err = r.Create(ctx, &jobBuilder)
+		if err != nil {
+			logger.Error(err, "unable to create a JobBuilder")
+			return ctrl.Result{}, err
+		}
+		logger.Info("JobBuilder created!")
+		return ctrl.Result{}, nil
+	}
 }
 
 // SetupWithManager sets up the controller with the Manager.

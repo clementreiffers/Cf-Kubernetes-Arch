@@ -35,11 +35,14 @@ spec:
           spec:
             description: WorkerReleaseSpec defines the desired state of WorkerRelease
             properties:
+              accounts:
+                type: string
               workerVersions:
                 additionalProperties:
                   type: string
                 type: object
             required:
+            - accounts
             - workerVersions
             type: object
           status:

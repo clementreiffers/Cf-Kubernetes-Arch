@@ -53,9 +53,12 @@ type WorkerVersionReconciler struct {
 func createWorkerRelease(instance *apiv1.WorkerVersion) apiv1.WorkerRelease {
 	return apiv1.WorkerRelease{
 		ObjectMeta: metav1.ObjectMeta{Name: getWorkerRelease(instance.Spec.Accounts), Namespace: instance.GetNamespace()},
-		Spec: apiv1.WorkerReleaseSpec{WorkerVersions: map[string]string{
-			instance.Spec.Scripts: instance.Spec.Url,
-		}},
+		Spec: apiv1.WorkerReleaseSpec{
+			WorkerVersions: map[string]string{
+				instance.Spec.Scripts: instance.Spec.Url,
+			},
+			Accounts: instance.Spec.Accounts,
+		},
 	}
 }
 
