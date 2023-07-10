@@ -64,7 +64,7 @@ func createJobBuilder(instance *apiv1.WorkerRelease, bundleName string) apiv1.Jo
 			Namespace: instance.GetNamespace()},
 		Spec: apiv1.JobBuilderSpec{
 			ScriptUrls:       getAllScriptsUrls(instance),
-			TargetImage:      fmt.Sprintf("build-%s", instance.Spec.Accounts),
+			TargetImage:      fmt.Sprintf("clementreiffers/build-%s", instance.Spec.Accounts),
 			WorkerBundleName: bundleName,
 			ScriptNames:      getAllScriptNames(instance),
 		},

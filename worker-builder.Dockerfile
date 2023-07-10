@@ -1,3 +1,5 @@
-FROM ubuntu AS worker-builder
+FROM node:alpine AS worker-builder
 
-RUN apt-get update && apt-get install -y clang libc++-dev nodejs npm
+RUN apk update && apk upgrade && apk add clang libc++-dev
+
+RUN yarn global add workerd

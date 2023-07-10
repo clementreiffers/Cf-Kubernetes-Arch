@@ -1,3 +1,3 @@
-FROM ubuntu AS worker
+FROM alpine AS worker-runner
 
-RUN apt-get update && apt-get install -y libc++-dev
+RUN apk update && apk upgrade && apk add libc++-dev
