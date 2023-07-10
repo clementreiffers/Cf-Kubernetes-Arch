@@ -36,7 +36,13 @@ func generateDownloadFilesContainer(instance *apiv1.JobBuilder) v1.Container {
 			{Name: "context", MountPath: "/context"},
 		},
 		Command: []string{"./s3-download-files-capnp-generator"},
-		Args:    []string{generateCmdPrebuild(instance.Spec.ScriptUrls, "/context")},
+		Args: []string{
+			"--s3-bucket-name", "$(AWS_BUCKET)",
+			"--s3-endpoint", "$(AWS_ENDPOINT)",
+			"--s3-region", "fr-par",
+			"--destination", "/context",
+			"--s3-object-key", strings.Join(instance.Spec.ScriptUrls, ","),
+		},
 	}
 }
 
