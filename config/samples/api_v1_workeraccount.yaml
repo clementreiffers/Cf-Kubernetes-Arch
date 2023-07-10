@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/part-of: workerbundle
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: workerbundle
-  name: "1234" # account
+  name: "398803b74bcdb1b454434669bc634190" # account
 spec:
   workerBundleName: worker-bundle-name
   workerReleaseSelector:

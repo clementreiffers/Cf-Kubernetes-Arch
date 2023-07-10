@@ -17,27 +17,26 @@ func generateAwsConfig() []v1.EnvVar {
 	}
 }
 
-func generateAwsCommandSync(scriptUrls []string, finalPath string) string {
-	personalizedAws := "aws --endpoint-url=$(AWS_ENDPOINT) s3 sync"
-	var commands []string
-	for _, url := range scriptUrls {
-		commands = append(commands, fmt.Sprintf(" %s %s %s", personalizedAws, url, finalPath))
-	}
-	return strings.Join(commands, " && ")
+func generateCmdPrebuild(scriptUrls []string, finalPath string) string {
+	return fmt.Sprintf("--s3-bucket-name %s --s3-endpoint %s --s3-region fr-par --destination %s --s3-object-key %s",
+		"$(AWS_BUCKET)",
+		"$(AWS_ENDPOINT)",
+		finalPath,
+		strings.Join(scriptUrls, ","))
 }
 
 func generateDownloadFilesContainer(instance *apiv1.JobBuilder) v1.Container {
 	return v1.Container{
 		Name:            "download-files",
-		Image:           "public.ecr.aws/aws-cli/aws-cli:latest",
-		ImagePullPolicy: "IfNotPresent",
+		Image:           "clementreiffers/s3-downloader-capnp-generator",
+		ImagePullPolicy: "Always",
 		Env:             generateAwsConfig(),
 		VolumeMounts: []v1.VolumeMount{
 			{Name: "s3-config", MountPath: "/root/.aws", ReadOnly: true},
 			{Name: "context", MountPath: "/context"},
 		},
-		Command: []string{"/bin/sh"},
-		Args:    []string{"-c", generateAwsCommandSync(instance.Spec.ScriptUrls, "/context")},
+		Command: []string{"./s3-download-files-capnp-generator"},
+		Args:    []string{generateCmdPrebuild(instance.Spec.ScriptUrls, "/context")},
 	}
 }
 
@@ -51,25 +50,6 @@ func generateGettingDockerfile() v1.Container {
 		},
 		Command: []string{"curl"},
 		Args:    []string{"-o", "/context/Dockerfile", "-L", "https://raw.githubusercontent.com/clementreiffers/Cf-Kubernetes-Arch/main/workerd.Dockerfile"},
-	}
-}
-
-func generateCapnp() v1.Container {
-	return v1.Container{
-		Name:            "generating-capnp",
-		Image:           "node",
-		ImagePullPolicy: "IfNotPresent",
-		Env:             generateAwsConfig(),
-		VolumeMounts: []v1.VolumeMount{
-			{Name: "s3-config", MountPath: "/root/.aws", ReadOnly: true},
-			{Name: "context", MountPath: "/context"},
-		},
-		Command: []string{"npx", "new-capnp-generator"},
-		Args: []string{
-			"--bucketName=$(AWS_BUCKET)",
-			"--s3Endpoint=$(AWS_ENDPOINT)",
-			"--outFile=/context/config.capnp",
-		},
 	}
 }
 
@@ -161,7 +141,6 @@ func createJob(instance *apiv1.JobBuilder) batchv1.Job {
 					InitContainers: []v1.Container{
 						generateDownloadFilesContainer(instance),
 						generateGettingDockerfile(),
-						generateCapnp(),
 					},
 					Containers: []v1.Container{
 						generateKaniko(instance),
