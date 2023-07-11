@@ -18,17 +18,19 @@ func generateAwsConfig() []v1.EnvVar {
 }
 
 func generateCmdPrebuild(scriptUrls []string, finalPath string) string {
-	return fmt.Sprintf("--s3-bucket-name %s --s3-endpoint %s --s3-region fr-par --destination %s --s3-object-key %s",
+	return fmt.Sprintf(
+		"--s3-bucket-name %s --s3-endpoint %s --s3-region fr-par --destination %s --s3-object-key %s",
 		"$(AWS_BUCKET)",
 		"$(AWS_ENDPOINT)",
 		finalPath,
-		strings.Join(scriptUrls, ","))
+		strings.Join(scriptUrls, ","),
+	)
 }
 
 func generateDownloadFilesContainer(instance *apiv1.JobBuilder) v1.Container {
 	return v1.Container{
 		Name:            "download-files",
-		Image:           "clementreiffers/s3-downloader-capnp-generator",
+		Image:           "clementreiffers/s3-downloader-capnp-generator:v3",
 		ImagePullPolicy: "Always",
 		Env:             generateAwsConfig(),
 		VolumeMounts: []v1.VolumeMount{
