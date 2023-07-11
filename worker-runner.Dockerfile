@@ -1,3 +1,3 @@
-FROM alpine AS worker-runner
+FROM debian:bullseye AS worker-runner
 
-RUN apk update && apk upgrade && apk add libc++-dev
+RUN apt-get update && apt-get install -y libc++-dev
