@@ -31,7 +31,7 @@ func generateDownloadFilesContainer(instance *apiv1.JobBuilder) v1.Container {
 	return v1.Container{
 		Name:            "download-files",
 		Image:           "clementreiffers/s3-downloader-capnp-generator:v3",
-		ImagePullPolicy: "Always",
+		ImagePullPolicy: "IfNotPresent",
 		Env:             generateAwsConfig(),
 		VolumeMounts: []v1.VolumeMount{
 			{Name: "s3-config", MountPath: "/root/.aws", ReadOnly: true},

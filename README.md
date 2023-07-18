@@ -1,10 +1,9 @@
-# workerbundle
-// TODO(user): Add simple overview of use/purpose
+# cf-worker-architecture
 
-## Description
-// TODO(user): An in-depth paragraph about your project and overview of use
+Set of Kubernetes Operators which manage Cloudflare Workers Deployment into Kubernetes Cluster.
 
 ## Getting Started
+
 You’ll need a Kubernetes cluster to run against. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.
 **Note:** Your controller will automatically use the current context in your kubeconfig file (i.e. whatever cluster `kubectl cluster-info` shows).
 
@@ -78,134 +77,6 @@ More information can be found via the [Kubebuilder Documentation](https://book.k
 
 ## Architecture
 
-### v1
-```mermaid
-stateDiagram-v2
-    state First {
-        JobBuilder
-        Registry
-    }
-    state Second {
-        WorkerBundle
-        Deployment
-    }
-    FakeCfApi --> WorkerDeployment : create or update
-    WorkerDeployment --> WorkerRelease : apply
-    WorkerRelease --> JobBuilder : create
-    JobBuilder --> Registry : push
-    WorkerAccount --> WorkerBundle : create
-    WorkerBundle --> Deployment : create
-    Registry --> Deployment : pull
-    JobBuilder --> WorkerBundle : update while finished
-```
-
-### WorkerDeployment
-
-```yaml
-apiVersion: api.cf-worker/v1
-kind: WorkerDeployment
-metadata:
-  name: "1234" # accounts
-  labels:
-    accounts: "1234"
-spec:
-  template:
-      scriptName: wasm-worker
-      secretRef: "secret-accounts-ref" # prefix WASM_WORKER_ toutes les var d'env
-      compatibilityDate: "MM/DD/YYYY"
-      scriptUrls:
-          - s3://stage-cf-worker/398803b74bcdb1b454434669bc634190/wasm-worker
-          - s3://stage-cf-worker/398803b74bcdb1b454434669bc634190/hello
-  releaseHistoryLimit: 10 # ne pas avoir trop de release
-```
-
-### WorkerRelease
-regrouper plusieurs workerRelease par accounts
-
-rebuild: chgement du code, secrets, env, comp date...
-```yaml
-apiVersion: api.cf-worker/v1
-kind: WorkerRelease
-metadata:
-  name: "1234" # accounts
-  labels:
-    accounts: "1234"
-spec:
-  scriptName: wasm-worker
-  secretRef: "secret-accounts-ref" # prefix WASM_WORKER_ toutes les var d'env
-  compatibilityDate: "MM/DD/YYYY"
-  scriptUrls: 
-    - "s3://path/to/dir/version/files1"
-    - "s3://path/to/dir/version/files2"
-```
-
-### WorkerBundle: unique
-```yaml
-apiVersion: api.cf-worker/v1
-kind: WorkerBundle
-metadata:
-  name: "1234" # accounts
-  labels:
-    accounts: "1234"
-  annotations: # purge des images
-    lastImage: "1234:v1" # delete if v2 done
-spec:
-  deploymentName: "deplName"
-  workers:
-    - workerName: wasm-worker 
-      workerNumber: 8080
-      envPrefix: WASM_WORKER_
-      secretRef: "secret-accounts-ref" # prefix WASM_WORKER_ toutes les var d'env
-    - workerName: artist-worker
-      workerNumber: 8081
-      envPrefix: ARTIST_WORKER_
-      secretRef: "secret-accounts-ref"
-  podTemplate:
-    image: "1234:v2" # accounts
-    imagePullSecret: "insert-secret-here"
-
-```
-
-### WorkerAccount
-qui va ou?
-créé statiquement pour juste référencer le bundle avec l'accounts
-```yaml
-apiVersion: api.cf-worker/v1
-kind: WorkerAccount
-metadata:
-  name: "1234" # accounts
-  labels:
-    accounts: "1234"
-spec:
-  workerBundleName: "workerBundleName"
-  workerReleaseSelector: 
-    matchLabels: 
-      accounts: "1234"
-  podTemplate:
-    imagePullSecret: "insert-secret-here"
-```
-    
-### JobBuilder
-```yaml
-apiVersion: api.cf-worker/v1
-kind: JobBuilder
-metadata:
-  name: "job-builder-name"
-  labels:
-    accounts: "1234"
-spec:
-  scriptNames:
-    - wasm-worker
-    - hello
-  scriptUrls:
-    - s3://stage-cf-worker/398803b74bcdb1b454434669bc634190/wasm-worker
-    - s3://stage-cf-worker/398803b74bcdb1b454434669bc634190/hello
-  targetImage: clementreiffers/artist-worker
-  workerBundleName: worker-bundle-name
-```
-
-### v2 
-
 ```mermaid
 stateDiagram-v2
     state First {
@@ -225,33 +96,31 @@ stateDiagram-v2
     Registry --> Deployment : pull
     JobBuilder --> WorkerBundle : update while finished
 ```
-### WorkerVersion
-```yaml
-apiVersion: api.cf-worker/v1
-kind: WorkerVersion
-metadata:
-  name: wasm-worker-version-5
-  labels:
-    accounts: "1234"
-spec:
-  accounts: "1234"
-  scripts: wasm-worker
-  url: s3://stage-cf-worker/398803b74bcdb1b454434669bc634190/wasm-worker
-```
 
-### WorkerRelease
+### WorkerAccount
+
+Once the architecture deployed into Kubernetes Cluster, you can create your first account into the architecture :
+
+
+> **Note** : you need to install wrangler by running `npm i -g wrangler`, run `wrangler login` and get the account ID by
+> running `wrangler whoami` and keep it for this step.
+
+you can now apply this resource into kubernetes :
 
 ```yaml
 apiVersion: api.cf-worker/v1
-kind: WorkerRelease
+kind: WorkerAccount
 metadata:
-  name: worker-release-1234
+  name: YOUR-WRANGLER-ACCOUNT-ID # accounts
   labels:
-    accounts: "1234"
+    accounts: YOUR-WRANGLER-ACCOUNT-ID
 spec:
-  workerVersions:
-    - wasm-worker : wasm-worker-version-5
-    - artist-worker : artist-worker-version-3
+  workerBundleName: "workerBundleName"
+  workerReleaseSelector: 
+    matchLabels: 
+      accounts: YOUR-WRANGLER-ACCOUNT-ID
+  podTemplate:
+    imagePullSecret: "insert-secret-here"
 ```
 
 ## License
