@@ -28,6 +28,7 @@ jobs:
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.5.0
         with:
+          skip_existing: true
           config: chart-releaser.yaml
           charts_dir: .cr-release-packages
         env:
