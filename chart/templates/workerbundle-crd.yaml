@@ -1,0 +1,85 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: workerbundles.api.cf-worker
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.11.1
+  labels:
+  {{- include "chart.labels" . | nindent 4 }}
+spec:
+  group: api.cf-worker
+  names:
+    kind: WorkerBundle
+    listKind: WorkerBundleList
+    plural: workerbundles
+    singular: workerbundle
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: WorkerBundle is the Schema for the workerbundles API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: WorkerBundleSpec defines the desired state of WorkerBundle
+            properties:
+              deploymentName:
+                type: string
+              podTemplate:
+                properties:
+                  image:
+                    type: string
+                  imagePullSecret:
+                    type: string
+                required:
+                - imagePullSecret
+                type: object
+              workers:
+                items:
+                  properties:
+                    envPrefix:
+                      type: string
+                    secretRef:
+                      type: string
+                    workerName:
+                      type: string
+                    workerNumber:
+                      format: int32
+                      type: integer
+                  required:
+                  - envPrefix
+                  - secretRef
+                  - workerName
+                  - workerNumber
+                  type: object
+                type: array
+            required:
+            - deploymentName
+            - podTemplate
+            type: object
+          status:
+            description: WorkerBundleStatus defines the observed state of WorkerBundle
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

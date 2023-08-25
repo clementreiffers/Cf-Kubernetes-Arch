@@ -1,0 +1,75 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: '[]'
+    capabilities: Basic Install
+  name: workerbundle.v0.0.0
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - description: JobBuilder is the Schema for the jobbuilders API
+      displayName: Job Builder
+      kind: JobBuilder
+      name: jobbuilders.api.cf-worker
+      version: v1
+    - description: WorkerAccount is the Schema for the workeraccounts API
+      displayName: Worker Account
+      kind: WorkerAccount
+      name: workeraccounts.api.cf-worker
+      version: v1
+    - description: WorkerBundle is the Schema for the workerbundles API
+      displayName: Worker Bundle
+      kind: WorkerBundle
+      name: workerbundles.api.cf-worker
+      version: v1
+    - description: WorkerDeployment is the Schema for the workerdeployments API
+      displayName: Worker Deployment
+      kind: WorkerDeployment
+      name: workerdeployments.api.cf-worker
+      version: v1
+    - description: WorkerRelease is the Schema for the workerreleases API
+      displayName: Worker Release
+      kind: WorkerRelease
+      name: workerreleases.api.cf-worker
+      version: v1
+    - description: WorkerVersion is the Schema for the workerversions API
+      displayName: Worker Version
+      kind: WorkerVersion
+      name: workerversions.api.cf-worker
+      version: v1
+  description: an opensource project that reproduce the functionment of cloudflare
+    workers
+  displayName: FireWorker
+  icon:
+  - base64data: ""
+    mediatype: ""
+  install:
+    spec:
+      deployments: null
+    strategy: ""
+  installModes:
+  - supported: false
+    type: OwnNamespace
+  - supported: false
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  keywords:
+  - cloudflare;worker;wrangler;kubernetes;
+  links:
+  - name: Workerbundle
+    url: https://workerbundle.domain
+  maintainers:
+  - email: reiffersclement@gmail.com
+    name: clementreiffers
+  - email: joseph.v.page@octo.com
+    name: josephpage
+  maturity: alpha
+  provider:
+    name: FireWorker
+  version: 0.0.0

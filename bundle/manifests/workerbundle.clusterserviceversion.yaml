@@ -1,0 +1,47 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: '[]'
+    capabilities: Basic Install
+    createdAt: "2023-08-25T13:30:46Z"
+    operators.operatorframework.io/builder: operator-sdk-v1.31.0
+    operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
+  name: workerbundle.v0.0.1
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions: {}
+  description: an opensource project that reproduce the functionment of cloudflare
+    workers
+  displayName: FireWorker
+  icon:
+  - base64data: ""
+    mediatype: ""
+  install:
+    spec:
+      deployments: []
+    strategy: deployment
+  installModes:
+  - supported: false
+    type: OwnNamespace
+  - supported: false
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  keywords:
+  - cloudflare;worker;wrangler;kubernetes;
+  links:
+  - name: Workerbundle
+    url: https://workerbundle.domain
+  maintainers:
+  - email: reiffersclement@gmail.com
+    name: clementreiffers
+  - email: joseph.v.page@octo.com
+    name: josephpage
+  maturity: alpha
+  provider:
+    name: FireWorker
+  version: 0.0.1
