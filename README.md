@@ -1,4 +1,4 @@
-# cf-worker-architecture
+# fire-worker
 
 Set of Kubernetes Operators which manage Cloudflare Workers Deployment into Kubernetes Cluster.
 
