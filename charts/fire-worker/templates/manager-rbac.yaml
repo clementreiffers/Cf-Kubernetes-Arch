@@ -1,0 +1,181 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "fire-worker.fullname" . }}-manager-role
+  labels:
+  {{- include "fire-worker.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - api.cf-worker
+  resources:
+  - jobbuilders
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - api.cf-worker
+  resources:
+  - jobbuilders/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - api.cf-worker
+  resources:
+  - jobbuilders/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - api.cf-worker
+  resources:
+  - workeraccounts
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - api.cf-worker
+  resources:
+  - workeraccounts/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - api.cf-worker
+  resources:
+  - workeraccounts/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - api.cf-worker
+  resources:
+  - workerbundles
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - api.cf-worker
+  resources:
+  - workerbundles/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - api.cf-worker
+  resources:
+  - workerbundles/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - api.cf-worker
+  resources:
+  - workerdeployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - api.cf-worker
+  resources:
+  - workerdeployments/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - api.cf-worker
+  resources:
+  - workerdeployments/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - api.cf-worker
+  resources:
+  - workerreleases
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - api.cf-worker
+  resources:
+  - workerreleases/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - api.cf-worker
+  resources:
+  - workerreleases/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - api.cf-worker
+  resources:
+  - workerversions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - api.cf-worker
+  resources:
+  - workerversions/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - api.cf-worker
+  resources:
+  - workerversions/status
+  verbs:
+  - get
+  - patch
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "fire-worker.fullname" . }}-manager-rolebinding
+  labels:
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: workerbundle
+    app.kubernetes.io/part-of: workerbundle
+  {{- include "fire-worker.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: '{{ include "fire-worker.fullname" . }}-manager-role'
+subjects:
+- kind: ServiceAccount
+  name: '{{ include "fire-worker.fullname" . }}-controller-manager'
+  namespace: '{{ .Release.Namespace }}'

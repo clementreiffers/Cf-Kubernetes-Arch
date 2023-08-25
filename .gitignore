@@ -25,5 +25,3 @@ Dockerfile.cross
 *.swo
 *~
 
-chart
-.cr-release-packages
