@@ -30,5 +30,6 @@ jobs:
         with:
           config: chart-releaser.yaml
           skip_packaging: true
+          charts_dir: .cr-release-packages/chart
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
