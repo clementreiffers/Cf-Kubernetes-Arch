@@ -288,4 +288,4 @@ $(HELMIFY): $(LOCALBIN)
 	test -s $(LOCALBIN)/helmify || GOBIN=$(LOCALBIN) go install github.com/arttor/helmify/cmd/helmify@latest
 
 helm: manifests kustomize helmify
-	$(KUSTOMIZE) build config/default | $(HELMIFY) .cr-release-packages/chart/fire-worker
+	$(KUSTOMIZE) build config/default | $(HELMIFY) charts/fire-worker
